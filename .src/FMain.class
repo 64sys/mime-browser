@@ -1,0 +1,324 @@
+' Gambas class file
+
+Public strAppCurrent As String
+Public strAppAlternCurrent As String
+Public strDefCurrent As String
+
+Public Sub Form_Open()
+  
+  FillTreeMime()
+  HSplit1.Layout = [2, 9]
+  HSplit2.Layout = [2, 2, 5]
+  Me.Maximized = True
+  
+End
+
+Public Function MimeTypesList() As String[] ''Devuelve una lista de todos los tipos mime que estan contemplados en el sistema.
+  
+  Dim stxOut As New String[]
+  Dim strDefaults As String
+  
+  strDefaults = "/usr/share/mime/types"
+  
+  If Exist(strDefaults) Then
+    If Stat(strDefaults).Type = gb.File Then
+      stxOut = Split(File.Load(strDefaults), "\n")
+    Endif
+  Endif
+  
+  Return stxOut
+  
+End
+
+Public Sub FillTreeApp(strMime As String)
+  
+  Dim stxApps As New String[]
+  Dim strApp As String
+  Dim strAppAltern As String
+  Dim picApp As Picture
+  
+  trvApp.Clear
+  
+  stxApps = Mimex(strMime)
+  If stxApps.Count > 0 Then
+    For Each strApp In stxApps
+      strAppAltern = Settings[strApp, ""]
+      Select strAppAltern
+        Case ""
+          picApp = MimeAppPicture(strApp, 22)
+          trvApp.Add(strApp, strApp, picApp)
+        Case Else
+          picApp = MimeAppPicture(strAppAltern, 22)
+          trvApp.Add(strApp, strAppAltern, picApp)
+      End Select
+      
+    Next
+  Endif 
+  
+End
+
+Public Sub FillTreeMime(Optional str As String) '' El parametro que se pasa es un texto quw se usa de filtro
+  
+  Dim stxMimeTypes As New String[]
+  Dim df As DesktopMime
+  Dim picMime As Picture
+  Dim picEmpty As Picture
+  Dim strMime As String
+  Dim stxApps As New String[]
+  Dim strApp As String
+  Dim intApps As Integer
+  
+  trvMimeTypes.Clear
+  trvMimeTypes.Add("types", "MIME", Picture["icon:/22/file"])
+  
+  stxMimeTypes = MimeTypesList()
+  
+  If str = False Then
+    str = ""
+  Endif
+  
+  For Each strMime In stxMimeTypes
+    
+    If strMime <> "" Then
+      df = DesktopMime[strMime]
+      picEmpty = Picture["icon:/22/error"]
+      picMime = Picture["icon:/22/ok"]
+      
+      If trvMimeTypes.Exist(strMime) = False Then
+        Select str
+          Case ""
+            intApps = 0
+            intApps = Mimex(strMime).Count
+            Select intApps
+              Case 0 
+                trvMimeTypes.Add(strMime, strMime, picEmpty, "types")
+              Case Else
+                trvMimeTypes.Add(strMime, strMime, picMime, "types")
+            End Select
+            
+          Case Else
+            
+            If InStr(strMime, str) > 0 Then
+              intApps = 0
+              intApps = Mimex(strMime).Count
+              Select intApps
+                Case 0 
+                  trvMimeTypes.Add(strMime, strMime, picEmpty, "types")
+                Case Else
+                  trvMimeTypes.Add(strMime, strMime, picMime, "types")
+              End Select
+              
+            Endif
+        End Select
+      Endif    
+    Endif    
+  Next
+  
+  trvMimeTypes["types"].Expanded = True
+  
+End
+
+Public Function Mimex(strMimeType As String) As String[] ''Devuelve una lista de los programas que estan asociados al tipo mime que se pasa como parametro.
+  
+  Dim stxOut As New String[]
+  Dim df As DesktopFile
+  
+  For Each df In DesktopFile.FromMime(strMimeType)
+    stxOut.Add(df.ProgramName)
+  Next
+  
+  Return stxOut
+  
+End
+
+Public Function MimeAppPicture(strApp As String, intSize As Integer) As Picture '' Devuelve la pintura "picture" de una aplicación.
+  
+  Dim pic As Picture
+  
+  If DesktopFile[strApp] Then
+    pic = DesktopFile[strApp].GetIcon(22).Picture
+  Else
+    pic = Picture["icon:/" & CStr(intSize) & "/remove"]
+  Endif
+  
+  Return pic
+  
+End
+
+Public Function MimeDefaultApp(strMimeType As String) As String ''Devuelve una lista con el programa asociado por defecto y la ruta dle icono si es que existe.
+  
+  Dim stx As New String[] 
+  Dim strOut As String
+  Dim strDefaults As String
+  Dim strLine As String
+  Dim strMim As String
+  Dim strApp As String
+  
+  strDefaults = "/usr/share/applications/defaults.list"
+  
+  If Exist(strDefaults) Then
+    Select Stat(strDefaults).Type
+      Case gb.File, gb.Link
+        'stx.Clear
+        'stx.Insert(Split(File.Load(strDefaults), "\n"))
+        stx = Split(File.Load(strDefaults), "\n")
+        'Wait 0.01
+        If stx.Count > 0 Then
+          For Each strLine In stx
+            If InStr(strLine, "=") > 0 Then
+              strMim = Split(strLine, "=")[0]
+              strApp = Split(strLine, "=")[1]
+              If strMim = strMimeType Then
+                If InStr(strApp, ".desktop") > 0 Then
+                  strOut = Replace(strApp, ".desktop", "")
+                Else
+                  strOut = strApp
+                Endif
+                Break
+              Endif
+            Endif
+          Next
+          
+        Endif
+    End Select
+  Endif
+  
+  Return strOut
+  
+End
+
+Public Sub trvMimeTypes_Select()
+  
+  Dim strKey As String
+  
+  strKey = trvMimeTypes.Key
+  
+  Select InStr(strKey, ":") 
+    Case 0
+      Print "Mime = " & strKey
+      strDefCurrent = MimeDefaultApp(strKey)
+      FillTreeApp(strKey)
+      
+      'txaApp.Text = ""
+  End Select
+  
+End
+
+Public Sub ButtonBox1_Change()
+  
+  Dim strFilter As String
+  
+  strFilter = ButtonBox1.Text
+  
+  FillTreeMime(strFilter)
+  
+End
+
+Public Sub trvApp_Select()
+  
+  Dim strKey As String
+  Dim strDesk As String 
+  Dim picApp As Picture
+  Dim picAppAltern As Picture
+  Dim strAppAltern As String
+  Dim stxLocate As New String[]
+  Dim strFile As String
+  Dim strLocate As String
+  Dim strText As String
+  Dim int As Integer
+  Dim picAltern As Picture
+  Dim strAppHelp As String
+  
+  strKey = trvApp.Key
+  If strAppCurrent <> strKey Then
+    strAppCurrent = strKey
+    
+    strAppHelp = ""
+    
+    Shell strAppCurrent & " -h &2>1" To strAppHelp 
+    If String.Len(strAppHelp) > 0 Then
+      txaAppHelp.Text = strAppHelp
+    Endif
+    'txaApp.Text = ""
+    strDesk = "/usr/share/applications/" & strKey & ".desktop" 
+    int = 0
+    If Exist(strDesk) Then
+      trvAppAltern.Visible = False
+      ' txaApp.Text = File.Load(strDesk)
+    Else
+      Shell "locate " & strAppCurrent & " | grep desktop & 2>1" To strLocate
+      stxLocate = Split(strLocate, "\n") 
+      strText = ""
+      
+      If stxLocate.Count > 0 Then
+        
+        trvAppAltern.Clear
+        
+        For Each strFile In stxLocate
+          If Exist(strFile) Then
+            If File.Ext(strFile) = "desktop" Then
+              strAppAltern = File.BaseName(strFile)
+              picAltern = MimeAppPicture(strAppAltern, 22)
+              trvAppAltern.Add(strFile, strAppAltern, picAltern)
+              
+              Inc int              
+            Endif
+            
+          Endif
+        Next
+      Endif
+      Select int
+        Case 0 
+          trvAppAltern.Visible = False
+          '    txaApp.Text = ("No se encontro información")
+          
+        Case Else
+          trvAppAltern.Visible = True
+          
+          '   txaApp.Text = ("Por favor seleccione una de las aplicaciones de aquí arriba")
+          
+      End Select
+      
+    Endif
+  Endif
+  
+End
+
+Public Sub trvApp_DblClick()
+  
+  Shell strAppCurrent '& " %U"
+  
+End
+
+Public Sub trvAppAltern_DblClick()
+  
+  If File.BaseName(trvAppAltern.Key) <> "" Then
+    strAppAlternCurrent = File.BaseName(trvAppAltern.Key)
+  Endif
+  
+  If strAppCurrent <> "" Then
+    If strAppAlternCurrent <> "" Then
+      Settings[strAppCurrent] = strAppAlternCurrent
+      Settings.Save
+    Endif
+  Endif
+  
+End
+
+Public Sub mnuOpenApp_Click()
+  
+  Shell strAppCurrent
+  
+End
+
+Public Sub mnuQuit_Click()
+  
+  Me.Close
+  
+End
+
+Public Sub mnuAbout_Click()
+  
+  GEFAbout.ShowModal()
+  
+End

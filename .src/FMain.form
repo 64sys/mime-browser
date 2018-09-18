@@ -1,0 +1,81 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,105,54)
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  { mnuArchivo Menu
+    Text = ("Archivo")
+    { mnuOpenApp Menu
+      Text = ("Ejecutar aplicación")
+      Picture = Picture["icon:/22/exec"]
+    }
+    { mnuQuit Menu
+      Text = ("Salir")
+      Picture = Picture["icon:/22/quit"]
+      Shortcut = "Alt+F4"
+    }
+  }
+  { mnuInfo Menu
+    #Translate = False
+    Text = "?"
+    { mnuHelp Menu
+      Text = ("Ayuda")
+      Picture = Picture["icon:/22/help"]
+    }
+    { mnuAbout Menu
+      Text = ("Acerca de")
+      Picture = Picture["icon:/22/info"]
+    }
+  }
+  { HSplit1 HSplit
+    MoveScaled(0,2,91,50)
+    Expand = True
+    Spacing = True
+    { pnlMime Panel
+      MoveScaled(5,7,28,40)
+      Expand = True
+      Arrangement = Arrange.Vertical
+      Spacing = True
+      { ButtonBox1 ButtonBox
+        MoveScaled(1,2,24,4)
+        Background = Color.Background
+        Picture = Picture["icon:/22/find"]
+      }
+      { trvMimeTypes TreeView
+        MoveScaled(2,8,18,15)
+        Background = Color.Background
+        Expand = True
+        Border = False
+      }
+    }
+    { Panel1 Panel
+      MoveScaled(36,2,54,45)
+      Expand = True
+      Arrangement = Arrange.Vertical
+      Spacing = True
+      { HSplit2 HSplit
+        MoveScaled(1,1,47,24)
+        Expand = True
+        { trvApp TreeView
+          MoveScaled(2,7,14,12)
+          Background = Color.Background
+          Border = False
+        }
+        { trvAppAltern TreeView
+          MoveScaled(17,6,14,12)
+          Background = Color.Background
+          Expand = True
+          Border = False
+        }
+        { txaAppHelp TextArea
+          MoveScaled(33,8,12,10)
+          Font = Font["Noto Mono"]
+          Background = Color.Background
+          Expand = True
+          Border = False
+        }
+      }
+    }
+  }
+}
