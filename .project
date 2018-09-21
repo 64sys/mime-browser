@@ -2,7 +2,7 @@
 Title=Mime Browser
 Startup=FMain
 Icon=logo.png
-Version=0.0.1
+Version=0.0.2
 Component=gb.image
 Component=gb.gui.qt
 Component=gb.form
@@ -12,6 +12,6 @@ Description="Explorador extensiones multipropósito de correo de internet"
 Authors="Martín Belmonte"
 TabSize=2
 Translate=1
-Language=en_US
+Language=es
 Vendor=Belmotek
 Packager=1

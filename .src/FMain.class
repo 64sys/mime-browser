@@ -64,8 +64,8 @@ Public Sub FillTreeMime(Optional str As String) '' El parametro que se pasa es u
   Dim picMime As Picture
   Dim picEmpty As Picture
   Dim strMime As String
-  Dim stxApps As New String[]
-  Dim strApp As String
+  'Dim stxApps As New String[]
+  'Dim strApp As String
   Dim intApps As Integer
   
   trvMimeTypes.Clear
@@ -218,8 +218,8 @@ Public Sub trvApp_Select()
   
   Dim strKey As String
   Dim strDesk As String 
-  Dim picApp As Picture
-  Dim picAppAltern As Picture
+  'Dim picApp As Picture
+  'Dim picAppAltern As Picture
   Dim strAppAltern As String
   Dim stxLocate As New String[]
   Dim strFile As String
