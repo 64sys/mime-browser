@@ -235,7 +235,9 @@ Public Sub trvApp_Select()
     
     strAppHelp = ""
     
-    Shell strAppCurrent & " -h &2>1" To strAppHelp 
+    'Shell strAppCurrent & " -h &2>1" To strAppHelp 
+    Shell "man " & strAppCurrent & " &2>1" To strAppHelp 
+    
     If String.Len(strAppHelp) > 0 Then
       txaAppHelp.Text = strAppHelp
     Endif
@@ -320,5 +322,9 @@ End
 Public Sub mnuAbout_Click()
   
   GEFAbout.ShowModal()
+  
+End
+
+Public Sub mnuHelp_Click()
   
 End
